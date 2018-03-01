@@ -17,6 +17,7 @@ function postNewMessage(event) {
     loadingMessage.style.display = ''
     const formData = new FormData(form)
     const message = formData.get('user_message')
+    const name = formData.get('user_name')
     const data = {
         "data": {
             "character": name,
@@ -24,7 +25,7 @@ function postNewMessage(event) {
         }
     }
     sendMessage(data)
-        .then(showResponse)
+        // .then(showResponse)
 }
 
 function sendMessage (data) {
@@ -35,8 +36,25 @@ function sendMessage (data) {
             headers: {
                 'content-type': 'application/json'
             }
-    }).then(response => response.json())
-    
+    }).then(response => {
+        if (response.ok) {
+            return response.json()
+        }
+        else {
+            return response.json().then(response => {
+                const err = new Error(response.error.message)
+                throw err
+            })
+            
+        }
+    })
+    .then(showResponse)
+    .catch(err => {  
+        serverMessage.textContent = err.message
+        loadingMessage.style.display = 'none'
+        form.style.display = ''
+        textInputBox.value = ''
+    })
 }
 
 function showResponse(response) {
